@@ -1,5 +1,11 @@
 const inquirer = require('inquirer');
-const generateHTML = require('./generateHTML'); // this is a separate module that generates the HTML file based on the user input
+const path = require('path');
+const fs = require('fs');
+const generateHTML = require('./utils/generateHTML');
+const Employee = require('./lib/Employee');
+const Manager = require('./lib/Manager');
+const Engineer = require('./lib/Engineer');
+const Intern = require('./lib/intern');
 
 // This function prompts the user for the manager's information
 function promptManager() {
@@ -91,33 +97,45 @@ function promptTeamMember() {
   ]);
 }
 
+function saveHTMLFile(directory, filename, htmlContent) {
+  const filePath = path.join(__dirname, directory, filename);
+  fs.writeFile(filePath, htmlContent, function (err) {
+    if (err) throw err;
+    console.log(`File "${filePath}" has been saved.`);
+  });
+}
+
 // This is the main function that drives the application
 async function runApp() {
   const team = [];
-  let manager;
 
   // Prompt the user for the manager's information
-  manager = await promptManager();
-  team.push(manager);
+  let manager = await promptManager();
+  let newManager = new Manager(manager.name, manager.id, manager.email, manager.officeNumber);
+  team.push(newManager);
 
   // Prompt the user for team members until they choose to finish
   while (true) {
     const { choice } = await promptTeamMember();
 
     if (choice === 'Engineer') {
-      const engineer = await promptEngineer();
-      team.push(engineer);
+      let engineer = await promptEngineer();
+      let newEngineer = new Engineer(engineer.name, engineer.id, engineer.email, engineer.github);
+      team.push(newEngineer);
     } else if (choice === 'Intern') {
-      const intern = await promptIntern();
-      team.push(intern);
+      let intern = await promptIntern();
+      let newIntern = new Intern(intern.name, intern.id, intern.email, intern.school);
+      team.push(newIntern);
     } else {
       // The user has chosen to finish building the team
       break;
     }
   }
-
+  
   // Generate the HTML file based on the team information
-  generateHTML(team);
+  const htmlContent = generateHTML(team); // call your generateHTML() function to get the HTML content
+  saveHTMLFile('dist', `${newManager.getName()}.html`, htmlContent); // call the saveHTMLFile() function to save the HTML file
+
 }
 
 // Call the main function to start the application

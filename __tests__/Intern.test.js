@@ -1,4 +1,5 @@
 const Intern = require('../lib/intern');
+const Employee = require('../lib/Employee');
 
 describe("Intern class", () => {
     it("Can instantiate Intern instance", () => {
